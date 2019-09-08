@@ -12,11 +12,28 @@ class Rect():
         self.vectPos = pygame.Vector2(0, 0)
         self.velocity = pygame.Vector2(0, 0)
         self.rect = pygame.Rect((self.vectPos.x, self.vectPos.y), (self.width, self.height))
+        self.update_directions()
+        self.save_color()
     
     def update(self, dt):
+        self.save_directions_old()
         self.accelerate(dt)
+        self.update_directions()
         self.detect_limit_window()
         self.rect = pygame.Rect((self.vectPos.x, self.vectPos.y), (self.width, self.height))
+    
+    def update_directions(self):
+        self.left = self.vectPos.x
+        self.right = self.vectPos.x + self.width
+        self.top = self.vectPos.y
+        self.bottom = self.vectPos.y + self.height
+        self.center = pygame.Vector2(((self.vectPos.x + self.width)/2), ((self.vectPos.y + self.height)/2))
+    
+    def save_directions_old(self):
+        self.left_old = self.left
+        self.right_old = self.right
+        self.top_old = self.top
+        self.bottom_old = self.bottom
 
     def detect_limit_window(self):
         if (self.vectPos.x < 0):
@@ -54,6 +71,9 @@ class Rect():
 
     def set_color(self, _color):
         self.color = _color
+
+    def save_color(self):
+        self.color_origin = self.color
 
     def get_rect(self):
         return self.rect

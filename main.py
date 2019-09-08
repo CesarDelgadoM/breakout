@@ -9,22 +9,26 @@ class ColisionesRect():
         self.clock = pygame.time.Clock()
         self.start_game()
         self.WHITE = 255, 255, 255
+        self.GREEN = 0, 255, 0
+        self.BLUE = 0, 0, 255
         self.BLACK = 0, 0, 0
         self.RED = 255, 0, 0
         self.wind_size = (600, 600)
         self.WIN_WIDTH = self.wind_size[0]
         self.WIN_HEIGHT = self.wind_size[1]
         self.window = pygame.display.set_mode(self.wind_size, 0, 0, 0)
-        self.rect = Rect(self.window, 50, 50, self.WHITE)
-        self.rect_static = Rect(self.window, 70, 70, self.WHITE)
+        self.rect = Rect(self.window, 50, 50, self.BLACK)
+        self.rect_static = Rect(self.window, 70, 70, self.GREEN)
         self.rect_static.set_position((self.WIN_WIDTH/2), (self.WIN_HEIGHT/2))
+        self.rect_static_2 = Rect(self.window, 70, 70, self.BLUE)
+        self.rect_static_2.set_position(self.rect_static.vectPos.x, self.rect_static.vectPos.y - self.rect_static.height)
         self.loop()
     
     def start_game(self):
         self.game_over = False
-        self.vel = 5
         self.colision_x = False
         self.colision_y = False
+        self.vel = 5
     
     def loop(self):
         self.dt = 0
@@ -36,14 +40,17 @@ class ColisionesRect():
             self.dt = self.clock.tick(60) / 1000.0
             
     def update(self, dt):
-        self.rect.update(dt) 
+        self.rect.update(dt)
         self.rect_static.update(dt)
-        self.detect_colision(self.rect, self.rect_static)
+        self.rect_static_2.update(dt)
+        if (not self.detect_colision(self.rect, self.rect_static)):
+            self.detect_colision(self.rect, self.rect_static_2)
     
     def render(self):
-        self.window.fill(self.BLACK)
+        self.window.fill(self.WHITE)
         self.rect.draw()
         self.rect_static.draw()
+        self.rect_static_2.draw()
         pygame.display.flip()
     
     def ctrl_events(self):
@@ -65,8 +72,10 @@ class ColisionesRect():
         if (self.AABB_vs_AABB(rect1, rect2)):
             rect2.set_color(self.RED)
             self.resolve_collision(rect1, rect2)
+            return True
         else:
-            rect2.set_color(self.WHITE)
+            rect2.set_color(rect2.color_origin)
+            return False
 
     def AABB_vs_AABB(self, rect1, rect2):
         if (rect1.vectPos.x + rect1.width >= rect2.vectPos.x and
@@ -82,8 +91,14 @@ class ColisionesRect():
         return self.colision_x and self.colision_y
     
     def resolve_collision(self, rect1, rect2):
-        pass
-        
+        if (rect1.right_old < rect2.left):#collision left
+            rect1.velocity.x *= -1
+        if (rect1.left_old > rect2.right):#collision right
+            rect1.velocity.x *= -1
+        if (rect1.top_old > rect2.bottom):#collision bottom
+            rect1.velocity.y *= -1
+        if (rect1.bottom_old < rect2.top):#collsion top
+            rect1.velocity.y *= -1
 
 if __name__ == "__main__":
     play = ColisionesRect()
