@@ -2,6 +2,7 @@ import pygame
 import sys
 from Rect import *
 import cmath
+import random
 
 class ColisionesRect():
 
@@ -22,13 +23,26 @@ class ColisionesRect():
         self.rect_static.set_position((self.WIN_WIDTH/2), (self.WIN_HEIGHT/2))
         self.rect_static_2 = Rect(self.window, 70, 70, self.BLUE)
         self.rect_static_2.set_position(self.rect_static.vectPos.x, self.rect_static.vectPos.y - self.rect_static.height)
+        self.cargar_rect()
         self.loop()
+
+    def cargar_rect(self):
+        width = random.randint(20, 70)
+        height = random.randint(20, 70)
+        pos_mouse = pygame.mouse.get_pos()
+        posX = pos_mouse[0]#random.randint(0, self.WIN_WIDTH - width)
+        posY = pos_mouse[1]#random.randint(0, self.WIN_HEIGHT - height)
+        rect = Rect(self.window, width, height, self.BLACK)
+        rect.set_position(posX, posY)
+        self.list_rect.append(rect)
     
     def start_game(self):
+        self.list_rect = []
         self.game_over = False
         self.colision_x = False
         self.colision_y = False
-        self.vel = 5
+        self.gravity = pygame.Vector2(0, 5)
+        self.clic = True
     
     def loop(self):
         self.dt = 0
@@ -40,33 +54,46 @@ class ColisionesRect():
             self.dt = self.clock.tick(60) / 1000.0
             
     def update(self, dt):
-        self.rect.update(dt)
-        self.rect_static.update(dt)
-        self.rect_static_2.update(dt)
-        if (not self.detect_colision(self.rect, self.rect_static)):
-            self.detect_colision(self.rect, self.rect_static_2)
+        #self.rect.velocity += self.gravity
+        for rect in self.list_rect:
+            rect.velocity += self.gravity
+            rect.desacelerar(rect.friction)
+            rect.update(dt)
+        #self.rect.update(dt)
+        #self.rect_static.update(dt)
+        #self.rect_static_2.update(dt)
+        #if (not self.detect_colision(self.rect, self.rect_static)):
+        #    self.detect_colision(self.rect, self.rect_static_2)
     
     def render(self):
         self.window.fill(self.WHITE)
-        self.rect.draw()
-        self.rect_static.draw()
-        self.rect_static_2.draw()
+        for rect in self.list_rect:
+            rect.draw()
+        #self.rect.draw()
+        #self.rect_static.draw()
+        #self.rect_static_2.draw()
         pygame.display.flip()
     
     def ctrl_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-        keys = pygame.key.get_pressed()
-        if (keys[pygame.K_UP]):
-            self.rect.velocity.y -= self.vel
-        if (keys[pygame.K_DOWN]):
-            self.rect.velocity.y += self.vel
-        if (keys[pygame.K_RIGHT]):
-            self.rect.velocity.x += self.vel
-        if (keys[pygame.K_LEFT]):
-            self.rect.velocity.x -= self.vel
-        self.rect.desacelerar(self.rect.friction)
+        mouse = pygame.mouse.get_pressed()
+        if (mouse[0] and self.clic):
+            self.clic = False
+            self.cargar_rect()
+        elif (not mouse[0] and not self.clic):
+            self.clic = True
+        #keys = pygame.key.get_pressed()
+        #if (keys[pygame.K_UP]):
+        #    self.rect.velocity.y -= self.vel
+        #if (keys[pygame.K_DOWN]):
+        #    self.rect.velocity.y += self.vel
+        #if (keys[pygame.K_RIGHT]):
+        #    self.rect.velocity.x += self.vel
+        #if (keys[pygame.K_LEFT]):
+        #    self.rect.velocity.x -= self.vel
+        #self.rect.desacelerar(self.rect.friction)
 
     def detect_colision(self, rect1, rect2):
         if (self.AABB_vs_AABB(rect1, rect2)):
@@ -92,13 +119,21 @@ class ColisionesRect():
     
     def resolve_collision(self, rect1, rect2):
         if (rect1.right_old < rect2.left):#collision left
-            rect1.velocity.x *= -1
+            #rect1.velocity.x *= -1
+            rect1.vectPos.x = rect2.left - rect1.width - 0.1
+            rect1.velocity.x = 0
         if (rect1.left_old > rect2.right):#collision right
-            rect1.velocity.x *= -1
+            #rect1.velocity.x *= -1
+            rect1.vectPos.x = rect2.right + 0.1
+            rect1.velocity.x = 0
         if (rect1.top_old > rect2.bottom):#collision bottom
-            rect1.velocity.y *= -1
+            #rect1.velocity.y *= -1
+            rect1.vectPos.y = rect2.bottom + 0.1
+            rect1.velocity.y = 0
         if (rect1.bottom_old < rect2.top):#collsion top
-            rect1.velocity.y *= -1
+            #rect1.velocity.y *= -1
+            rect1.vectPos.y = rect2.top - rect1.height - 0.1
+            rect1.velocity.y = 0
 
 if __name__ == "__main__":
     play = ColisionesRect()

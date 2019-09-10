@@ -56,14 +56,16 @@ class Rect():
         self.vectPos += self.velocity * dt
 
     def desacelerar(self, friction):
-        if (self.velocity.x > 0):
-            self.velocity.x -= friction
-        else:
-            self.velocity.x += friction
-        if (self.velocity.y > 0):
-            self.velocity.y -= friction
-        else:
-            self.velocity.y += friction
+        if (self.velocity.x != 0):
+            if (self.velocity.x > 0):
+                self.velocity.x -= friction
+            else:
+                self.velocity.x += friction
+        if (self.velocity.y != 0):                
+            if (self.velocity.y > 0):
+                self.velocity.y -= friction
+            else:
+                self.velocity.y += friction
         
     def set_position(self, _posX, _posY):
         self.vectPos.x = _posX
