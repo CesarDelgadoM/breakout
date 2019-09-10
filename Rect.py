@@ -1,6 +1,6 @@
 import pygame
 
-class Rect():
+class Rect(object):
 
     def __init__(self, _window, _width, _height, _color):
         self.window = _window
@@ -13,6 +13,7 @@ class Rect():
         self.velocity = pygame.Vector2(0, 0)
         self.rect = pygame.Rect((self.vectPos.x, self.vectPos.y), (self.width, self.height))
         self.update_directions()
+        self.save_directions_old()
         self.save_color()
     
     def update(self, dt):
@@ -48,6 +49,7 @@ class Rect():
         if (self.vectPos.y + self.height > self.size_win[1]):
             self.vectPos.y = self.size_win[1] - self.height
             self.velocity.y *= -1
+        #self.desacelerar(self.friction)
 
     def draw(self):
         pygame.draw.rect(self.window, self.color, self.rect)
